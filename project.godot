@@ -12,10 +12,13 @@ config_version=5
 
 config/name="NEXUS"
 config/description="Atelier 3D de construction et d'expérimentation de machines."
-config/version="0.1.0"
+config/version="0.2.0"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="NEXUS"
 run/main_scene="res://scenes/main_menu/main_menu.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
+config/windows_native_icon="res://resources/app/nexus.ico"
 boot_splash/bg_color=Color(0.0431373, 0.0509804, 0.0627451, 1)
 boot_splash/show_image=false
 

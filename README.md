@@ -1,186 +1,161 @@
 # NEXUS
 
-Jeu PC en 3D de construction et d'expérimentation libre : le joueur construit des
-machines, les relie et combine mécanique, énergie, fluides et automatisation.
-Développé avec **Godot 4.3** et **GDScript**.
+Jeu PC en 3D de construction et d'expérimentation : construisez des machines, reliez-les et
+combinez mécanique, énergie, fluides et automatisation. Développé avec **Godot 4.3** et **GDScript**.
 
-![Menu principal](docs/screenshots/main_menu.png)
+![Atelier en simulation](docs/screenshots/workshop.png)
 
-> **État actuel : étape 1 terminée.** Projet Godot, identité visuelle, design
-> system réutilisable, menu principal, paramètres fonctionnels, et une première
-> version de l'atelier (mise en page, panneaux, sauvegarde). La construction 3D
-> et les machines arrivent aux étapes suivantes (voir [Feuille de route](#feuille-de-route)).
+**Version 0.2.0** : construction 3D et simulation jouables. Les 10 premières machines fonctionnent
+réellement. Le jeu est livré sous forme d'un exécutable Windows autonome.
 
 ---
 
-## Télécharger le jeu (Windows)
+## Jouer sans installer Godot (Windows)
 
-Les versions prêtes à jouer sont publiées dans les
-[Releases GitHub](https://github.com/banchetnolan2-hub/NEXUS/releases) :
-téléchargez `NEXUS-vX.Y.Z-windows-x64.zip`, décompressez-le et lancez `NEXUS.exe`
-(aucune installation). L'exécutable n'est pas signé : si SmartScreen s'affiche,
-cliquez sur **Informations complémentaires → Exécuter quand même**.
+1. Téléchargez `NEXUS-v0.2.0-windows-x64.zip` dans les
+   [Releases](https://github.com/banchetnolan2-hub/NEXUS/releases).
+2. Décompressez-le n'importe où, puis lancez **`NEXUS.exe`**.
 
-## Lancer le projet
+Le jeu tient dans un seul fichier, `NEXUS.exe` : les ressources sont intégrées à l'exécutable.
+Il ne dépend ni de Godot, ni du dossier source, ni d'une connexion Internet.
+L'exécutable n'est pas signé : si SmartScreen s'affiche, cliquez sur
+**Informations complémentaires → Exécuter quand même**.
 
-1. Installez **Godot 4.3** (version standard, pas .NET) depuis
-   <https://godotengine.org/download/archive/4.3-stable/>. Les versions 4.4 et
-   suivantes ouvrent aussi le projet (Godot propose alors de le convertir).
-2. Lancez Godot, cliquez sur **Importer**, choisissez le fichier `project.godot`
-   à la racine de ce dépôt, puis **Importer et modifier**.
-   Le premier import prend quelques secondes (polices, icônes).
-3. Appuyez sur **F5** (ou le bouton ▶ en haut à droite) pour lancer le jeu.
+| Données | Emplacement (Windows) |
+|---|---|
+| Sauvegardes | `%APPDATA%\NEXUS\saves\*.nexus` |
+| Paramètres | `%APPDATA%\NEXUS\settings.cfg` |
+| Journaux | `%APPDATA%\NEXUS\logs\` |
 
-Pour lancer le jeu sans ouvrir l'éditeur :
+Ces données ne sont pas stockées dans le dossier du jeu : vous pouvez le déplacer ou installer une
+nouvelle version sans perdre vos parties.
 
-```bash
-godot --path /chemin/vers/NEXUS
-```
+Sans carte compatible Vulkan, lancez `NEXUS.exe --rendering-method gl_compatibility`.
+Pour vérifier une installation, lancez `NEXUS.exe -- --selftest`. Cet autotest contrôle les
+ressources, les paramètres et une partie d'exemple avec sauvegarde et rechargement. Le rapport est
+écrit dans `%APPDATA%\NEXUS\selftest\report.txt`.
 
-Le rendu utilise **Forward+** (Vulkan). Sur une machine sans Vulkan, lancez avec
-`--rendering-method gl_compatibility`.
+## Première partie
+
+1. **Nouvelle partie** : choisissez un nom, puis *Atelier vide* ou *Exemple : remplissage automatique*.
+2. Dans la **bibliothèque** (à gauche), cliquez sur un composant, puis dans l'atelier pour le poser.
+   L'aperçu est cyan quand l'emplacement est libre, rouge sinon, et la raison s'affiche.
+3. Passez en **outil Connexion** (`C`) : cliquez sur un port (sphère colorée), puis sur un port de
+   la même couleur.
+4. **Sélectionnez** une machine : l'inspecteur (à droite) affiche ses réglages, son état en direct
+   et ses connexions.
+5. **Lancez** la simulation (`Espace`) et observez les machines : voyants d'état, rotors, niveau
+   des réservoirs, câbles qui s'allument quand ils transportent quelque chose.
+6. **Enregistrez** (`Ctrl+S`), puis reprenez plus tard avec **Continuer**.
+
+## Machines
+
+| Domaine | Machine | Rôle | Réglages |
+|---|---|---|---|
+| Énergie | Générateur | Alimente son réseau électrique | Production maximale |
+| Énergie | Voyant lumineux | Consommateur commandé par un signal | Puissance |
+| Mécanique | Moteur électrique | Entraîne un arbre | Vitesse cible |
+| Mécanique | Transmission | Multiplie la vitesse | Rapport |
+| Mécanique | Ventilateur industriel | Machine réceptrice : charge proportionnelle à la vitesse | Charge |
+| Fluides | Réservoir | Stocke du fluide (0 à la capacité) | Capacité, niveau initial, consommation |
+| Fluides | Pompe | Transfère d'un réservoir à un autre ; commande par signal | Débit |
+| Logique | Interrupteur | Signal manuel | Position |
+| Logique | Capteur de niveau | Mesure un réservoir, signal à hystérésis | Mode, seuils |
+| Logique | Porte logique | ET / OU / NON | Fonction |
+
+Toutes les machines ont un réglage *Activé* : une machine désactivée ne consomme ni ne produit rien.
+
+Les règles de simulation sont simples et déterministes, avec 20 pas par seconde quelle que soit la
+fréquence d'affichage. La demande de chaque réseau électrique est comparée à sa production : en cas
+de manque, les machines ralentissent et le signalent. Un moteur surchargé ralentit. Les réservoirs
+ne dépassent jamais leur capacité et ne passent jamais sous zéro. Les connexions incompatibles sont
+refusées avec une explication.
 
 ## Contrôles
 
-| Où | Touche | Action |
-|---|---|---|
-| Partout | `F11` | Basculer plein écran / fenêtré |
-| Menus | `↑` `↓` / `Tab` | Naviguer |
-| Menus | `Entrée` / `Espace` | Valider |
-| Fenêtres | `Échap` | Fermer la fenêtre |
-| Atelier | `Échap` | Menu (reprendre, enregistrer, paramètres, quitter) |
-| Atelier | `Ctrl+S` | Enregistrer l'atelier |
-| Atelier | `Ctrl+L` | Afficher / réduire la bibliothèque |
-| Atelier | `Ctrl+I` | Afficher / réduire l'inspecteur |
+| Action | Touches |
+|---|---|
+| Orbiter / déplacer la vue / zoomer | Clic droit glissé · clic molette glissé · molette |
+| Se déplacer | `Z Q S D` (AZERTY) / `W A S D` (QWERTY) · `Maj` pour aller plus vite |
+| Centrer sur la sélection | `F` |
+| Sélectionner / déplacer | Clic / glisser |
+| Pivoter | `R` (aperçu ou sélection) |
+| Dupliquer / supprimer | `Ctrl+D` / `Suppr` |
+| Annuler / rétablir | `Ctrl+Z` / `Ctrl+Y` |
+| Outil Sélection / Connexion | `V` / `C` |
+| Lancer, mettre en pause / réinitialiser | `Espace` / `Ctrl+R` |
+| Enregistrer | `Ctrl+S` |
+| Bibliothèque / inspecteur / recherche | `Ctrl+L` / `Ctrl+I` / `Ctrl+F` |
+| Annuler l'action en cours, menu | `Échap` |
+| Aide / plein écran | `F1` / `F11` |
 
-Les contrôles de caméra, de placement et de simulation seront ajoutés avec les
-étapes 2 à 4.
+## Développement
 
-## Ce qui fonctionne (étape 1)
+### Ouvrir le projet
+Installez [Godot 4.3](https://godotengine.org/download/archive/4.3-stable/) (version standard,
+pas .NET), importez `project.godot`, puis appuyez sur `F5`.
+Sans éditeur : `godot --path /chemin/vers/NEXUS`.
 
-- **Menu principal** animé (décor 3D d'engrenages qui s'engrènent selon leurs
-  rapports de dents) : Nouvelle partie, Continuer (désactivé tant qu'aucune
-  sauvegarde n'existe, affiche le nom et l'âge de la dernière), Charger,
-  Paramètres, Quitter. Navigation complète au clavier.
-- **Paramètres réellement appliqués et sauvegardés** (`user://settings.cfg`) :
-  volume général / effets / interface, qualité graphique (4 préréglages :
-  ombres, MSAA, SSAO…), mode d'affichage, résolution, synchronisation verticale,
-  sensibilité et inversion de la caméra (enregistrées, utilisées à l'étape 2),
-  échelle de l'interface, infobulles, réduction des animations.
-- **Atelier** : vue 3D avec grille, barre d'outils, bibliothèque (recherche +
-  filtre par catégorie) et inspecteur repliables, barre d'état, menu Échap,
-  renommage de l'atelier, enregistrement `Ctrl+S`.
-- **Sauvegardes** versionnées (JSON), écriture atomique avec vérification et
-  copie `.bak` de la version précédente ; un fichier illisible est listé avec la
-  raison et n'est jamais écrasé automatiquement. Suppression avec confirmation.
-- **Protection des modifications** : quitter l'atelier ou fermer la fenêtre avec
-  des modifications non enregistrées demande confirmation.
-
-Captures : [atelier](docs/screenshots/workshop.png) ·
-[paramètres](docs/screenshots/settings.png) ·
-[menu Échap](docs/screenshots/pause_menu.png) ·
-[design system](docs/screenshots/ui_gallery.png)
-
-## Exporter pour Windows (.exe)
-
-Un préréglage **Windows Desktop** est fourni (`export_presets.cfg`, sortie
-`build/windows/NEXUS.exe`, PCK intégré à l'exécutable).
-
-1. Dans Godot : **Éditeur → Gérer les modèles d'exportation → Télécharger et
-   installer** (modèles 4.3, une seule fois).
-2. **Projet → Exporter…**, sélectionnez *Windows Desktop*, puis
-   **Exporter le projet** (décochez *Exporter avec débogage* pour une version finale).
-
-En ligne de commande (modèles installés) :
-
+### Tests
 ```bash
-godot --headless --path . --export-release "Windows Desktop" build/windows/NEXUS.exe
+tools/run_tests.sh /chemin/vers/godot
 ```
+Les 25 tests couvrent les paramètres, les sauvegardes (fichiers corrompus, migration v1, copie de
+secours), la simulation (énergie, mécanique, fluides, logique), les règles de connexion, le
+placement, l'annulation, l'exemple et une boucle de jeu complète pilotée à la souris et au clavier
+dans l'atelier réel. Le script échoue aussi si une erreur de script apparaît dans la sortie. Les
+tests sont exécutés à chaque push (`.github/workflows/ci.yml`).
 
-### Publication automatique
+### Exporter pour Windows
+Le préréglage **Windows Desktop** (`export_presets.cfg`) produit un `NEXUS.exe` en Release, avec le
+PCK intégré, l'icône et les informations de version.
 
-Le workflow `.github/workflows/release.yml` exporte le jeu et publie une release
-GitHub avec le `.zip` Windows à chaque tag de version :
+1. Godot : **Éditeur → Gérer les modèles d'exportation → Télécharger et installer** (4.3).
+2. Pour l'icône de l'exe : sous Windows, rien à faire. Sous Linux ou macOS, renseignez dans les
+   paramètres de l'éditeur `Export > Windows > rcedit` (rcedit-x64.exe) et `wine`, ou décochez
+   *Application > Modify Resources*.
+3. **Projet → Exporter… → Windows Desktop → Exporter le projet** (sans débogage), ou en ligne de
+   commande :
+   ```bash
+   godot --headless --path . --export-release "Windows Desktop" build/windows/NEXUS.exe
+   ```
+Le livrable est `build/windows/NEXUS.exe`, un fichier unique (dossier ignoré par git).
 
-```bash
-git tag v0.1.0
-git push origin v0.1.0
+**Release automatique.** Le workflow `.github/workflows/release.yml` (tag `v*` ou lancement manuel)
+exécute les tests, exporte le jeu, lance l'autotest de l'exe exporté sous Wine, puis publie le
+`.zip`.
+
+### Architecture
 ```
-
-> L'export de la v0.1.0 a été généré sous Linux avec les modèles officiels 4.3,
-> puis lancé avec Wine : le jeu démarre et affiche le menu principal sans erreur.
-> Il n'a pas encore été testé sur un vrai PC Windows. L'icône de l'exécutable
-> est celle de Godot par défaut (modifier les ressources de l'exe demande `rcedit`).
-
-## Tests
-
-Une suite de tests sans dépendance externe vérifie les paramètres, les
-sauvegardes (fichiers corrompus, versions futures, sauvegarde de secours), le
-thème, les icônes, le chargement des scènes et un parcours complet piloté au
-clavier (nouvelle partie → `Ctrl+S` → `Échap` → menu → Continuer).
-
-```bash
-godot --headless --path . -s res://tests/run_tests.gd
+autoload/      Services : Settings, Game (session + autotest), UI (dialogues, notifications…)
+simulation/    Simulation pure, sans nœud : SimWorld (placement, connexions, solveur),
+               SimComponent, SimBehavior, components/*.gd (une machine = un fichier),
+               NxRegistry, SimulationRunner (pas fixe)
+construction/  BuildController (outils, annuler), WorldView (3D), WorkshopCamera,
+               NxUndoStack, NxTemplates
+components/    Visuels 3D des machines, matériaux, catalogue des catégories
+scenes/        main_menu/, workshop/ (+ hud/ : barre d'outils, bibliothèque, inspecteur,
+               barre d'état, aide), common/, dev/
+ui/            Design system : theme/, components/ (NxDialog, NxSidePanel…), screens/
+saves/         SaveManager (format versionné, écriture atomique, migrations)
+tests/         run_tests.gd, workshop_loop_test.gd, export_smoke.gd (inclus dans l'export)
+tools/         run_tests.sh, build_theme.gd, capture_screenshots.gd
 ```
+Pour **ajouter une machine**, écrivez `simulation/components/ma_machine.gd`, qui déclare ses ports,
+ses réglages, son état et son comportement. Ajoutez-la à `NxRegistry.TYPES` et, si vous le
+souhaitez, ajoutez son modèle dans `nx_component_visual.gd`. La bibliothèque, l'inspecteur, les
+connexions et les sauvegardes la prennent en charge automatiquement.
 
-Le code de sortie vaut 0 si tous les tests passent.
-
-## Architecture
-
-```
-autoload/      Services globaux : Settings, Game (session), UI (dialogues,
-               notifications, transitions, infobulles, sons)
-components/    Composants et leurs visuels 3D (catalogue, matériaux, engrenages)
-construction/  Placement sur grille, sélection, caméra (étape 2)
-simulation/    Simulation à pas fixe, indépendante de l'affichage (étapes 4–6)
-saves/         SaveManager : format, lecture/écriture, migrations
-scenes/        Écrans : main_menu/, workshop/, common/, dev/ (galerie UI)
-ui/            Design system : theme/ (palette, générateur de thème),
-               components/ (NxDialog, NxSidePanel…), screens/ (paramètres, chargement)
-resources/     Polices, icônes SVG, éléments de thème, shaders, bus audio
-tests/         Tests automatisés
-tools/         Génération du thème, captures d'écran
-docs/          Documentation et captures
-```
-
-Principes :
-
-- **Une seule source pour le style** : `ui/theme/nx_palette.gd` (couleurs,
-  espacements, tailles) → `ui/theme/nx_theme_builder.gd` → `ui/theme/nexus_theme.tres`
-  (thème du projet, visible aussi dans l'éditeur). Détails dans
-  [docs/design-system.md](docs/design-system.md).
-- **Simulation séparée de la présentation** : les scripts de `simulation/` ne
-  connaîtront ni les nœuds 3D ni l'interface.
-- **Paramètres** lus via `Settings.get_value("section/clé")` et suivis avec le
-  signal `Settings.setting_changed`.
-
-Après une modification de la palette ou du générateur de thème, régénérez le thème :
-
-```bash
-godot --headless --path . -s res://tools/build_theme.gd
-```
-
-## Feuille de route
-
-1. ✅ Projet Godot, identité visuelle et interface de base
-2. Atelier 3D : caméra, grille et placement
-3. Bibliothèque de composants et inspecteur
-4. Connexions et première machine fonctionnelle
-5. Mécanique et énergie
-6. Fluides et automatisation
-7. Assemblage avancé et plans
-8. Sauvegardes complètes et paramètres
-9. Optimisation, corrections et export Windows
+Pour le design system (palette, variantes, composants), voir
+[docs/design-system.md](docs/design-system.md). Pour l'historique, voir [CHANGELOG.md](CHANGELOG.md).
 
 ## Problèmes connus
-
-- Les boutons de simulation, Annuler et Rétablir sont visibles mais désactivés
-  (une infobulle l'explique) jusqu'aux étapes concernées.
-- La bibliothèque affiche les quatre catégories, encore sans composant.
-- Les réglages de caméra sont enregistrés mais n'auront d'effet qu'avec la
-  caméra de l'étape 2.
-- Le rendu a été vérifié sous Linux (Vulkan logiciel et OpenGL) et l'exe Windows
-  sous Wine, pas encore sur un vrai PC Windows.
-- L'exécutable Windows n'est pas signé et utilise l'icône Godot par défaut.
-- Polices sous licence SIL OFL : Inter et JetBrains Mono
-  (`resources/fonts/*-LICENSE.txt`).
+- L'exécutable Windows a été validé sous **Wine** (Linux), pas sur un vrai PC Windows. Les tests
+  couvrent le rendu Vulkan (Forward+) et OpenGL, le menu, une partie complète à la souris et au
+  clavier, Continuer, et les paramètres conservés après redémarrage.
+- L'exécutable n'est pas signé (avertissement SmartScreen).
+- Les 10 machines n'ont pas toutes un modèle détaillé : les modèles sont stylisés, en primitives.
+- Pas encore de regroupement en plans réutilisables (étape 7) ni de batterie.
+- Annuler/rétablir couvre les actions de construction et les réglages, pas l'état de la simulation
+  (utilisez Réinitialiser).
+- Polices sous licence SIL OFL : Inter et JetBrains Mono (`resources/fonts/*-LICENSE.txt`).

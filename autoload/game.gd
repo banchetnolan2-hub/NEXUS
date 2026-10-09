@@ -23,14 +23,29 @@ var dirty := false:
 		dirty_changed.emit(dirty)
 
 
+func _ready() -> void:
+	# Exported builds can check themselves: NEXUS.exe -- --selftest
+	if "--selftest" in OS.get_cmdline_user_args() or "--selftest" in OS.get_cmdline_args():
+		_run_self_test.call_deferred()
+
+
+func _run_self_test() -> void:
+	var script: GDScript = load("res://tests/export_smoke.gd")
+	if script == null or not script.can_instantiate():
+		push_error("Autotest indisponible dans cette version.")
+		get_tree().quit(2)
+		return
+	await script.new().run(get_tree())
+
+
 func has_session() -> bool:
 	return not workshop_data.is_empty()
 
 
-func new_session(name: String = DEFAULT_NAME) -> void:
+func new_session(name: String = DEFAULT_NAME, template: StringName = &"empty") -> void:
 	session_name = name
 	save_path = ""
-	workshop_data = { "components": [], "connections": [] }
+	workshop_data = { "world": NxTemplates.build(template), "camera": {} }
 	dirty = false
 	session_changed.emit()
 

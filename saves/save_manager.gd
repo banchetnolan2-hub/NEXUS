@@ -4,9 +4,9 @@ extends Node
 ## A save is a JSON document with a format id and a version number:
 ##   {
 ##     "format": "nexus-save",
-##     "version": 1,
+##     "version": 2,
 ##     "meta": { "name": "...", "created": <unix>, "modified": <unix>, "game_version": "..." },
-##     "workshop": { ... }
+##     "workshop": { "world": <SimWorld.serialize()>, "camera": {...} }
 ##   }
 ## Writes are atomic: the data goes to a temporary file which is verified
 ## before it replaces the previous save, and the previous save is kept as
@@ -17,7 +17,7 @@ signal saves_changed
 const SAVE_DIR := "user://saves"
 const EXTENSION := "nexus"
 const FORMAT_ID := "nexus-save"
-const FORMAT_VERSION := 1
+const FORMAT_VERSION := 2
 
 ## Directory scanned for saves; tests point it elsewhere.
 var save_dir := SAVE_DIR
@@ -195,11 +195,17 @@ func new_save_path(name: String) -> String:
 
 ## Upgrades older documents to FORMAT_VERSION. Add one step per new version.
 func _migrate(data: Dictionary, from_version: int) -> Dictionary:
-	var _version := from_version
-	# Example for the future:
-	# if _version == 1:
-	#     data = _migrate_1_to_2(data)
-	#     _version = 2
+	var version := from_version
+	if version == 1:
+		# v1 (0.1.x) stored empty "components"/"connections" lists directly in
+		# "workshop"; v2 stores a SimWorld under "world" plus the camera.
+		var old: Variant = data.get("workshop", {})
+		if typeof(old) == TYPE_DICTIONARY and not old.has("world"):
+			data.workshop = { "world": {
+				"components": old.get("components", []),
+				"connections": old.get("connections", []) }, "camera": {} }
+		version = 2
+	data.version = version
 	return data
 
 

@@ -138,7 +138,7 @@ theme_override_constants/separation = 2
 [node name="NewGame" type="Button" parent="UI/Root/Content/Column/Menu"]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Ouvrir un atelier vide."
+tooltip_text = "Créer un atelier vide ou partir d'un exemple."
 theme_type_variation = &"MenuEntryButton"
 text = "Nouvelle partie"
 icon = ExtResource("3_plus")
@@ -219,7 +219,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"DimLabel"
 theme_override_font_sizes/font_size = 12
-text = "v0.1.0"
+text = "v0.2.0"
 
 [node name="FooterSpacer" type="Control" parent="UI/Root/Content/Column/Footer"]
 layout_mode = 2

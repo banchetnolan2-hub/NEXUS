@@ -1,21 +1,19 @@
 name: Release Windows
 
-# Publishes a GitHub release with the Windows build when a version tag
-# (e.g. v0.1.0) is pushed. Can also be started by hand from the Actions tab.
+# Builds the Windows release, runs the exported NEXUS.exe self-test under
+# Wine, then publishes a GitHub release with the zip. Triggered by a version
+# tag (v*) or by hand from the Actions tab.
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag de la release (ex. v0.1.0)"
+        description: "Tag de la release (ex. v0.2.0)"
         required: true
 
 permissions:
   contents: write
-
-env:
-  GODOT_VERSION: "4.3"
 
 jobs:
   export-windows:
@@ -27,44 +25,35 @@ jobs:
         id: tag
         run: echo "name=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
 
-      - name: Cache Godot
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/godot
-            ~/.local/share/godot/export_templates
-          key: godot-${{ env.GODOT_VERSION }}-windows-templates
-
-      - name: Install Godot and Windows export templates
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-          mkdir -p ~/godot
-          curl -sSL --retry 5 -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          unzip -q godot.zip -d ~/godot
-          mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
-          curl -sSL --retry 5 -o templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
-          dest=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-          mkdir -p "$dest"
-          unzip -q -j templates.tpz \
-            templates/version.txt \
-            templates/windows_release_x86_64.exe templates/windows_release_x86_64_console.exe \
-            templates/windows_debug_x86_64.exe templates/windows_debug_x86_64_console.exe \
-            -d "$dest"
-          rm godot.zip templates.tpz
-
-      - name: Import project
-        run: ~/godot/godot --headless --path . --import || true
+      - uses: ./.github/actions/setup-godot
 
       - name: Run tests
-        run: ~/godot/godot --headless --path . -s res://tests/run_tests.gd
+        run: tools/run_tests.sh ~/godot/godot
 
-      - name: Export Windows build
+      - name: Install Wine and rcedit (exe icon and version info)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends wine64
+          mkdir -p ~/tools ~/.config/godot
+          curl -sSL --retry 5 -o ~/tools/rcedit-x64.exe \
+            https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe
+          wine=$(command -v wine64 || echo /usr/lib/wine/wine64)
+          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/windows/rcedit = "%s"\nexport/windows/wine = "%s"\n' \
+            "$HOME/tools/rcedit-x64.exe" "$wine" > ~/.config/godot/editor_settings-4.3.tres
+          echo "WINE_BIN=$wine" >> "$GITHUB_ENV"
+
+      - name: Export Windows release
         run: |
           mkdir -p build/windows
           ~/godot/godot --headless --path . --export-release "Windows Desktop" build/windows/NEXUS.exe
           test -s build/windows/NEXUS.exe
+
+      - name: Self-test the exported NEXUS.exe (Wine, outside the project folder)
+        run: |
+          mkdir -p /tmp/dist && cp build/windows/NEXUS.exe /tmp/dist/
+          cd /tmp/dist
+          WINEDEBUG=-all "$WINE_BIN" NEXUS.exe --headless -- --selftest | tee selftest.log
+          grep -q "RÉSULTAT : OK" selftest.log
 
       - name: Package
         id: pkg
@@ -83,15 +72,4 @@ jobs:
           target_commitish: ${{ github.sha }}
           files: ${{ steps.pkg.outputs.file }}
           prerelease: true
-          body: |
-            Version Windows 64 bits de NEXUS (prototype — étape 1 : interface et identité visuelle).
-
-            **Installation** : téléchargez le `.zip`, décompressez-le, lancez `NEXUS.exe`.
-            Aucune installation n'est nécessaire. Les paramètres et sauvegardes sont stockés dans
-            `%APPDATA%\Godot\app_userdata\NEXUS`.
-
-            L'exécutable n'est pas signé : Windows SmartScreen peut afficher
-            « Windows a protégé votre ordinateur ». Cliquez sur **Informations complémentaires → Exécuter quand même**.
-
-            Configuration conseillée : carte graphique compatible Vulkan. Sans Vulkan, lancez
-            `NEXUS.exe --rendering-method gl_compatibility`.
+          body_path: docs/release-notes.md

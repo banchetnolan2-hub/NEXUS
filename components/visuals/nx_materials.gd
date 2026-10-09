@@ -52,6 +52,41 @@ static func glow(color: Color = P.ACCENT, energy: float = 2.4) -> StandardMateri
 		return m)
 
 
+## Dark machine base plate.
+static func base_plate() -> StandardMaterial3D:
+	return _cached(&"base_plate", func() -> Material:
+		var m := StandardMaterial3D.new()
+		m.albedo_color = Color("232830")
+		m.metallic = 0.3
+		m.roughness = 0.6
+		return m)
+
+
+## Translucent tank shell.
+static func glass() -> StandardMaterial3D:
+	return _cached(&"glass", func() -> Material:
+		var m := StandardMaterial3D.new()
+		m.albedo_color = Color(0.62, 0.72, 0.82, 0.18)
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.metallic = 0.2
+		m.roughness = 0.08
+		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+		return m)
+
+
+## Liquid inside tanks.
+static func fluid() -> StandardMaterial3D:
+	return _cached(&"fluid", func() -> Material:
+		var m := StandardMaterial3D.new()
+		m.albedo_color = Color(P.FLUID, 0.85)
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.emission_enabled = true
+		m.emission = P.FLUID
+		m.emission_energy_multiplier = 0.35
+		m.roughness = 0.15
+		return m)
+
+
 ## Workshop grid floor.
 static func grid_floor() -> ShaderMaterial:
 	return _cached(&"grid_floor", func() -> Material:

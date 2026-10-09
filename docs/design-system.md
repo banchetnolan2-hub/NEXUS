@@ -40,8 +40,8 @@ Appliquées avec la propriété `theme_type_variation` d'un contrôle.
 
 | Type | Variantes |
 |---|---|
-| Button | `PrimaryButton`, *(défaut = secondaire)*, `GhostButton`, `DangerButton`, `ToolButton` (icône seule), `MenuEntryButton` (menu principal), `NavButton` (navigation verticale, listes), `ChipButton` (filtres) |
-| PanelContainer | `Card`, `InsetPanel`, `SidePanel`, `BarPanel`, `DialogPanel`, `ToastPanel`, `KeyCap` |
+| Button | `PrimaryButton`, *(défaut = secondaire)*, `GhostButton`, `DangerButton`, `ToolButton` (icône seule), `MenuEntryButton` (menu principal), `NavButton` (navigation verticale, listes), `ChipButton` (filtres), `LibraryCard` (carte cliquable de bibliothèque / modèle), `SegmentButton` (outils, vitesse), `PlayButton` (lancer la simulation) |
+| PanelContainer | `Card`, `InsetPanel`, `SidePanel`, `BarPanel`, `DialogPanel`, `ToastPanel`, `KeyCap`, `Pill` (pastille d'état), `SegmentGroup` (groupe de segments), `HintPanel` (bulle d'aide de l'atelier) |
 | Label | `Wordmark`, `Headline`, `TitleLabel`, `SectionLabel` (à utiliser avec `uppercase`), `MutedLabel`, `DimLabel`, `CaptionLabel`, `ValueLabel`, `AccentLabel` |
 
 ## Composants réutilisables (`ui/components/`)
@@ -56,6 +56,16 @@ Appliquées avec la propriété `theme_type_variation` d'un contrôle.
 | `NxEmptyState` | Message centré quand une liste est vide |
 | `NxKeyHint` | Touches de raccourci affichées comme des touches de clavier |
 | `NxIcons` | Accès aux icônes (`NxIcons.get_icon("save")`) |
+| `NxThumbnails` | Miniatures 3D des machines, rendues une fois hors écran |
+| `NxHud` | Petits constructeurs du HUD : boutons d'outil, badges de domaine, pastilles d'état |
+
+## États des machines
+
+Une seule correspondance couleur ↔ état, partout (voyant 3D, pastille de l'inspecteur) :
+en marche = vert `SUCCESS`, avertissement (énergie insuffisante, surcharge, source vide) = ambre
+`WARNING`, erreur (non alimenté, non relié) = rouge `DANGER`, à l'arrêt = gris, désactivé = gris
+foncé. Les connexions prennent la couleur de leur type (électricité jaune, arbre cuivre, tuyau
+bleu, signal violet, mesure violet clair) et s'illuminent quand elles transportent quelque chose.
 
 Services de l'autoload `UI` :
 

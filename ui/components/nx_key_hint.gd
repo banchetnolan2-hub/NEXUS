@@ -11,6 +11,7 @@ func _init(keys: PackedStringArray = PackedStringArray(), label_text: String = "
 		var cap := PanelContainer.new()
 		cap.theme_type_variation = &"KeyCap"
 		cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var key_label := Label.new()
 		key_label.text = key
 		key_label.theme_type_variation = &"CaptionLabel"

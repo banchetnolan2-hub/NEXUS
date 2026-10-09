@@ -17,6 +17,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var ui: Node = root.get_node("UI")
 	var settings: Node = root.get_node("Settings")
+	var game: Node = root.get_node("Game")
 	settings.autosave = false
 	settings.set_value(&"interface/reduce_motion", true)
 
@@ -24,40 +25,66 @@ func _run() -> void:
 	await _frames(90)
 	await _shot("01_main_menu")
 
+	ui.open_dialog(load("res://ui/screens/new_game_dialog.gd").new())
+	await _frames(20)
+	await _shot("02_new_game")
+	ui.close_all_dialogs()
+	await _frames(10)
+
 	ui.open_dialog(load("res://ui/screens/settings_screen.gd").new())
 	await _frames(20)
-	await _shot("02_settings")
+	await _shot("03_settings")
 	ui.close_all_dialogs()
 	await _frames(10)
 
-	ui.open_dialog(load("res://ui/screens/load_dialog.gd").new())
+	# Demo workshop, running.
+	game.new_session("Exemple", &"demo")
+	change_scene_to_file("res://scenes/workshop/workshop.tscn")
+	await _frames(120)  # Thumbnails render.
+	var ws: Node = current_scene
+	ws.runner.start()
+	ws.runner.set_speed(4.0)
+	await _frames(90)
+	await _shot("04_workshop_running")
+
+	# Selection + inspector.
+	var pump_id := -1
+	for id in ws.world.components:
+		if ws.world.components[id].type == &"pump":
+			pump_id = id
+	ws.controller.select(pump_id)
 	await _frames(20)
-	await _shot("03_load_dialog")
+	await _shot("05_inspector_pump")
+
+	# Connection tool.
+	ws.controller.select(-1)
+	ws.controller.set_tool(1 + 1)  # CONNECT
+	await _frames(10)
+	await _shot("06_connection_tool")
+
+	# Placement ghost (valid then invalid).
+	ws.runner.pause()
+	ws.controller.begin_place(&"motor")
+	ws.controller.view.show_ghost(&"motor", Vector2i(6, -2), 0, true)
+	ws.controller.view.show_ghost(&"tank", Vector2i(-3, 2), 0, false)
+	await _frames(10)
+	await _shot("07_placement_ghost")
+	ws.controller.set_tool(0)
+
+	ws.open_help()
+	await _frames(20)
+	await _shot("08_help")
 	ui.close_all_dialogs()
 	await _frames(10)
 
-	root.get_node("Game").new_session()
+	game.new_session("Atelier sans titre", &"empty")
 	change_scene_to_file("res://scenes/workshop/workshop.tscn")
 	await _frames(60)
-	ui.toast("Atelier « Atelier sans titre » enregistré.", &"success")
-	await _frames(20)
-	await _shot("04_workshop")
-
-	current_scene.open_pause_menu()
-	await _frames(20)
-	await _shot("05_pause_menu")
-	ui.close_all_dialogs()
-	await _frames(10)
-
-	var hud: Node = current_scene.get_node("%WorkshopHUD")
-	hud.library.set_collapsed(true, false)
-	hud.inspector.set_collapsed(true, false)
-	await _frames(20)
-	await _shot("06_workshop_collapsed")
+	await _shot("09_workshop_empty")
 
 	change_scene_to_file("res://scenes/dev/ui_gallery.tscn")
 	await _frames(40)
-	await _shot("07_ui_gallery")
+	await _shot("10_ui_gallery")
 	quit()
 
 

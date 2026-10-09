@@ -9,8 +9,10 @@ extends RefCounted
 ##
 ## Type variations defined here (use them through `theme_type_variation`):
 ##   Buttons : PrimaryButton, GhostButton, DangerButton, ToolButton,
-##             MenuEntryButton, NavButton, ChipButton
-##   Panels  : Card, SidePanel, BarPanel, DialogPanel, ToastPanel, KeyCap, InsetPanel
+##             MenuEntryButton, NavButton, ChipButton, LibraryCard,
+##             SegmentButton, PlayButton
+##   Panels  : Card, SidePanel, BarPanel, DialogPanel, ToastPanel, KeyCap,
+##             InsetPanel, Pill, SegmentGroup, HintPanel
 ##   Labels  : Wordmark, Headline, TitleLabel, SectionLabel, MutedLabel,
 ##             DimLabel, CaptionLabel, ValueLabel, AccentLabel
 
@@ -239,6 +241,42 @@ func _build_buttons() -> void:
 	_theme.set_constant("icon_max_width", "ChipButton", 14)
 	_theme.set_constant("h_separation", "ChipButton", 6)
 
+	# Library cards: whole card is a toggle button; selected = accent border.
+	_variation("LibraryCard", "Button")
+	var card_n := flat(P.BG_2, P.RADIUS_L - 2, P.BORDER, 1, 10, 10)
+	var card_h := flat(P.BG_3, P.RADIUS_L - 2, P.BORDER_STRONG, 1, 10, 10)
+	var card_p := flat(Color(P.ACCENT, 0.1), P.RADIUS_L - 2, P.ACCENT, 1, 10, 10)
+	_button_styles("LibraryCard", card_n, card_h, card_p, card_n, focus_ring(P.RADIUS_L - 2))
+	_font_colors("LibraryCard", P.TEXT, Color.WHITE, Color.WHITE, P.TEXT_DIM)
+
+	# Segmented controls (tool modes, simulation speed).
+	_variation("SegmentButton", "Button")
+	var seg_pad := 8
+	_button_styles("SegmentButton",
+		empty(seg_pad, 5),
+		flat(P.BG_3, P.RADIUS_S, Color.TRANSPARENT, 0, seg_pad, 5),
+		flat(P.BG_4, P.RADIUS_S, Color(P.ACCENT, 0.45), 1, seg_pad, 5),
+		empty(seg_pad, 5),
+		focus_ring(P.RADIUS_S))
+	_font_colors("SegmentButton", P.TEXT_MUTED, P.TEXT, P.ACCENT_HOVER, P.TEXT_DIM)
+	_theme.set_font_size("font_size", "SegmentButton", P.FONT_CAPTION + 1)
+	_theme.set_font("font", "SegmentButton", _medium)
+	_theme.set_constant("icon_max_width", "SegmentButton", 18)
+	_theme.set_constant("h_separation", "SegmentButton", 6)
+
+	# Large play button of the simulation bar.
+	_variation("PlayButton", "Button")
+	_button_styles("PlayButton",
+		flat(P.ACCENT, P.RADIUS_M, Color.TRANSPARENT, 0, 12, 6),
+		flat(P.ACCENT_HOVER, P.RADIUS_M, Color.TRANSPARENT, 0, 12, 6),
+		flat(P.ACCENT_PRESSED, P.RADIUS_M, Color.TRANSPARENT, 0, 12, 6),
+		flat(P.BG_3, P.RADIUS_M, Color.TRANSPARENT, 0, 12, 6),
+		focus_ring())
+	_font_colors("PlayButton", P.TEXT_ON_ACCENT, P.TEXT_ON_ACCENT, P.TEXT_ON_ACCENT, P.TEXT_DIM)
+	_theme.set_font("font", "PlayButton", _semibold)
+	_theme.set_font_size("font_size", "PlayButton", P.FONT_CAPTION + 1)
+	_theme.set_constant("icon_max_width", "PlayButton", 16)
+
 	# LinkButton (inline text links).
 	_font_colors("LinkButton", P.ACCENT, P.ACCENT_HOVER, P.ACCENT_PRESSED, P.TEXT_DIM)
 	_theme.set_stylebox("focus", "LinkButton", focus_ring(P.RADIUS_S))
@@ -282,6 +320,18 @@ func _build_panels() -> void:
 	toast.shadow_color = Color(0, 0, 0, 0.45)
 	toast.shadow_size = 16
 	_theme.set_stylebox("panel", "ToastPanel", toast)
+
+	_variation("Pill", "PanelContainer")
+	_theme.set_stylebox("panel", "Pill", flat(P.BG_3, 11, Color.TRANSPARENT, 0, 9, 2))
+
+	_variation("SegmentGroup", "PanelContainer")
+	_theme.set_stylebox("panel", "SegmentGroup", flat(P.BG_0, P.RADIUS_M, P.BORDER, 1, 3, 3))
+
+	_variation("HintPanel", "PanelContainer")
+	var hint := flat(Color(P.BG_1, 0.92), P.RADIUS_L, P.BORDER, 1, P.SPACE_L, 7)
+	hint.shadow_color = Color(0, 0, 0, 0.3)
+	hint.shadow_size = 10
+	_theme.set_stylebox("panel", "HintPanel", hint)
 
 	_variation("KeyCap", "PanelContainer")
 	var keycap := flat(P.BG_3, P.RADIUS_S, P.BORDER_STRONG, 1, 6, 1)

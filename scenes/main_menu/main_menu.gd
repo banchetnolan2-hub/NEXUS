@@ -4,6 +4,7 @@ extends Node
 const P := preload("res://ui/theme/nx_palette.gd")
 const SettingsScreen := preload("res://ui/screens/settings_screen.gd")
 const LoadDialog := preload("res://ui/screens/load_dialog.gd")
+const NewGameDialog := preload("res://ui/screens/new_game_dialog.gd")
 
 @onready var _brand: Control = %Brand
 @onready var _menu: VBoxContainer = %Menu
@@ -18,8 +19,7 @@ const LoadDialog := preload("res://ui/screens/load_dialog.gd")
 
 
 func _ready() -> void:
-	_version.text = "NEXUS v%s  ·  Étape 1 — interface et identité visuelle" % \
-		ProjectSettings.get_setting("application/config/version", "0.0.0")
+	_version.text = "NEXUS v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
 	_hints.add_child(NxKeyHint.new(["↑", "↓"], "Naviguer"))
 	_hints.add_child(NxKeyHint.new(["Entrée"], "Valider"))
 	_hints.add_child(NxKeyHint.new(["F11"], "Plein écran"))
@@ -64,7 +64,13 @@ func _play_intro() -> void:
 
 
 func _on_new_game() -> void:
-	Game.new_session()
+	var dialog := NewGameDialog.new()
+	dialog.confirmed.connect(start_new_game)
+	UI.open_dialog(dialog)
+
+
+func start_new_game(session_name: String, template: StringName = &"empty") -> void:
+	Game.new_session(session_name, template)
 	UI.change_scene(Game.WORKSHOP_SCENE)
 
 

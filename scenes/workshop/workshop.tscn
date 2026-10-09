@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scenes/workshop/workshop.gd" id="1_ws"]
 [ext_resource type="Script" path="res://scenes/common/studio_environment.gd" id="2_env"]
 [ext_resource type="Script" path="res://scenes/workshop/workshop_hud.gd" id="3_hud"]
+[ext_resource type="Script" path="res://construction/workshop_camera.gd" id="4_cam"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
 size = Vector2(200, 200)
@@ -31,9 +32,7 @@ mesh = SubResource("PlaneMesh_floor")
 [node name="Camera" type="Camera3D" parent="World"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 7.5, 10)
-fov = 50.0
-near = 0.05
-far = 300.0
+script = ExtResource("4_cam")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

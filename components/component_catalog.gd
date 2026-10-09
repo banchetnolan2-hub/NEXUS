@@ -1,9 +1,7 @@
 class_name NxCatalog
 extends RefCounted
-## Component categories shown in the library.
-##
-## Components will register here from step 3; categories are fixed by the
-## design (mechanics, energy, fluids, logic).
+## Component categories shown in the library. Machine types themselves are
+## registered in NxRegistry (simulation/component_registry.gd).
 
 const CATEGORIES := [
 	{ "id": &"mechanical", "name": "Mécanique", "icon": "gear",
@@ -24,6 +22,6 @@ static func category(id: StringName) -> Dictionary:
 	return {}
 
 
-## Component definitions available in the library (none yet in step 1).
-static func components() -> Array[Dictionary]:
-	return []
+## Machine type ids of a category, in library order.
+static func components(category: StringName = &"") -> Array[StringName]:
+	return NxRegistry.types(category)

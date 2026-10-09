@@ -1,0 +1,32 @@
+name: Setup Godot
+description: Installs Godot 4.3 (Linux) and the Windows export templates, cached.
+runs:
+  using: composite
+  steps:
+    - name: Cache Godot
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/godot
+          ~/.local/share/godot/export_templates
+        key: godot-4.3-windows-templates
+    - name: Download Godot and templates
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        base="https://github.com/godotengine/godot/releases/download/4.3-stable"
+        mkdir -p ~/godot
+        curl -sSL --retry 5 -o godot.zip "$base/Godot_v4.3-stable_linux.x86_64.zip"
+        unzip -q godot.zip -d ~/godot
+        mv ~/godot/Godot_v4.3-stable_linux.x86_64 ~/godot/godot
+        curl -sSL --retry 5 -o templates.tpz "$base/Godot_v4.3-stable_export_templates.tpz"
+        dest=~/.local/share/godot/export_templates/4.3.stable
+        mkdir -p "$dest"
+        unzip -q -j templates.tpz templates/version.txt \
+          templates/windows_release_x86_64.exe templates/windows_release_x86_64_console.exe \
+          templates/windows_debug_x86_64.exe templates/windows_debug_x86_64_console.exe -d "$dest"
+        rm godot.zip templates.tpz
+    - name: Import project
+      shell: bash
+      run: ~/godot/godot --headless --path . --import || true
