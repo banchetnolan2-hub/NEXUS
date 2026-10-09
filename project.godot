@@ -1,0 +1,52 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="NEXUS"
+config/description="Atelier 3D de construction et d'expérimentation de machines."
+config/version="0.1.0"
+run/main_scene="res://scenes/main_menu/main_menu.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.0431373, 0.0509804, 0.0627451, 1)
+boot_splash/show_image=false
+
+[audio]
+
+buses/default_bus_layout="res://resources/audio/default_bus_layout.tres"
+
+[autoload]
+
+Settings="*res://autoload/settings.gd"
+SaveManager="*res://saves/save_manager.gd"
+Game="*res://autoload/game.gd"
+UI="*res://autoload/ui.gd"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom="res://ui/theme/nexus_theme.tres"
+common/snap_controls_to_pixels=true
+timers/tooltip_delay_sec=0.45
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=2
+environment/defaults/default_clear_color=Color(0.0431373, 0.0509804, 0.0627451, 1)
