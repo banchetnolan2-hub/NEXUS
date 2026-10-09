@@ -13,6 +13,14 @@ Développé avec **Godot 4.3** et **GDScript**.
 
 ---
 
+## Télécharger le jeu (Windows)
+
+Les versions prêtes à jouer sont publiées dans les
+[Releases GitHub](https://github.com/banchetnolan2-hub/NEXUS/releases) :
+téléchargez `NEXUS-vX.Y.Z-windows-x64.zip`, décompressez-le et lancez `NEXUS.exe`
+(aucune installation). L'exécutable n'est pas signé : si SmartScreen s'affiche,
+cliquez sur **Informations complémentaires → Exécuter quand même**.
+
 ## Lancer le projet
 
 1. Installez **Godot 4.3** (version standard, pas .NET) depuis
@@ -89,9 +97,20 @@ En ligne de commande (modèles installés) :
 godot --headless --path . --export-release "Windows Desktop" build/windows/NEXUS.exe
 ```
 
-> Aucun export `.exe` n'a encore été généré ni testé : l'environnement de
-> développement est sous Linux sans les modèles d'exportation. L'export et son
-> test sont prévus à l'étape 9.
+### Publication automatique
+
+Le workflow `.github/workflows/release.yml` exporte le jeu et publie une release
+GitHub avec le `.zip` Windows à chaque tag de version :
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+> L'export de la v0.1.0 a été généré sous Linux avec les modèles officiels 4.3,
+> puis lancé avec Wine : le jeu démarre et affiche le menu principal sans erreur.
+> Il n'a pas encore été testé sur un vrai PC Windows. L'icône de l'exécutable
+> est celle de Godot par défaut (modifier les ressources de l'exe demande `rcedit`).
 
 ## Tests
 
@@ -160,7 +179,8 @@ godot --headless --path . -s res://tools/build_theme.gd
 - La bibliothèque affiche les quatre catégories, encore sans composant.
 - Les réglages de caméra sont enregistrés mais n'auront d'effet qu'avec la
   caméra de l'étape 2.
-- Le rendu a été vérifié sous Linux (Vulkan logiciel et OpenGL), pas encore sur
-  une carte graphique Windows.
+- Le rendu a été vérifié sous Linux (Vulkan logiciel et OpenGL) et l'exe Windows
+  sous Wine, pas encore sur un vrai PC Windows.
+- L'exécutable Windows n'est pas signé et utilise l'icône Godot par défaut.
 - Polices sous licence SIL OFL : Inter et JetBrains Mono
   (`resources/fonts/*-LICENSE.txt`).
